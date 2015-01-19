@@ -1,0 +1,32 @@
+{
+	"type": "PTZ",
+	"value": "left" //up, down, lef, right
+}
+
+{
+	"type": "PTZ",
+	"return": 200 //200 OK,  403 Forbidden, 400 Bad Request
+}
+
+++++++++++++++++++++++++++++++++++++++++++
+{
+	"type": "VIDEO",
+	"value": "open" //close, open
+}
+
+{
+	"type": "VIDEO",
+	"return": 200,	//200 OK, 403 Forbidden, 400 Bad Request
+	"url": "rtsp://carlfeng.com:42131/camera.264"
+}
+
+++++++++++++++++++++++++++++++++++++++++++
+{
+	"type": "AUDIO",
+	"value": "HHHFHFKJDHFKHDSH4333435SDF3J4435FKSJDF23FHDKF"
+}
+
+{
+	"type": "AUDIO",
+	"return": 200,	//200 OK, 403 Forbidden, 400 Bad Request
+}

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-An 'echo bot' – simple client that just confirms any presence subscriptions
-and echoes incoming messages.
+An 'Service robot' – simple client that just confirms any presence subscriptions
+and handles incoming messages.
 """
 
 import sys
@@ -17,16 +17,19 @@ from pyxmpp2.presence import Presence
 from pyxmpp2.client import Client
 from pyxmpp2.settings import XMPPSettings
 from pyxmpp2.interfaces import EventHandler, event_handler, QUIT
-from pyxmpp2.streamevents import AuthorizedEvent, DisconnectedEvent
+from pyxmpp2.streamevents import DisconnectedEvent
 from pyxmpp2.interfaces import XMPPFeatureHandler
 from pyxmpp2.interfaces import presence_stanza_handler, message_stanza_handler
 from pyxmpp2.ext.version import VersionProvider
 
-class EchoBot(EventHandler, XMPPFeatureHandler):
-    """Echo Bot implementation."""
+from MessageHandler import MessageHandler
+
+class ServiceBot(EventHandler, XMPPFeatureHandler):
+    """Service robot implementation."""
     def __init__(self, my_jid, settings):
         version_provider = VersionProvider(settings)
         self.client = Client(my_jid, [self, version_provider], settings)
+        self.msg_handler = MessageHandler()
 
     def run(self):
         """Request client connection and start the main loop."""
@@ -69,7 +72,7 @@ class EchoBot(EventHandler, XMPPFeatureHandler):
 
     @message_stanza_handler()
     def handle_message(self, stanza):
-        """Echo every non-error ``<message/>`` stanza.
+        """Service every non-error ``<message/>`` stanza.
         
         Add "Re: " to subject, if any.
         """
@@ -77,9 +80,13 @@ class EchoBot(EventHandler, XMPPFeatureHandler):
             subject = u"Re: " + stanza.subject
         else:
             subject = None
+            
+        ret = self.msg_handler.process_msg(stanza.body)
+        print "Send response -> %s" % ret
+        
         msg = Message(stanza_type = stanza.stanza_type,
                         from_jid = stanza.to_jid, to_jid = stanza.from_jid,
-                        subject = subject, body = stanza.body,
+                        subject = subject, body = ret,
                         thread = stanza.thread)
         return msg
 
@@ -95,7 +102,7 @@ class EchoBot(EventHandler, XMPPFeatureHandler):
 
 def main():
     """Parse the command-line arguments and run the bot."""
-    parser = argparse.ArgumentParser(description = 'XMPP echo bot',
+    parser = argparse.ArgumentParser(description = 'XMPP Service bot',
                                     parents = [XMPPSettings.get_arg_parser()])
     parser.add_argument('jid', metavar = 'JID', 
                                         help = 'The bot JID')
@@ -111,7 +118,7 @@ def main():
 
     args = parser.parse_args()
     settings = XMPPSettings({
-                            "software_name": "Echo Bot"
+                            "software_name": "Service Bot"
                             })
     settings.load_arguments(args)
 
@@ -135,7 +142,7 @@ def main():
             logger.addHandler(handler)
             logger.propagate = False
 
-    bot = EchoBot(JID(args.jid), settings)
+    bot = ServiceBot(JID(args.jid), settings)
     try:
         bot.run()
     except KeyboardInterrupt:
